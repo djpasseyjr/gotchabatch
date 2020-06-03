@@ -23,7 +23,7 @@ def test_job_gen():
     if os.path.exists(DIR + "/GeneratedJobs/test_job"):
         empty_test_dir()
     args = [(np.random.rand(5)) for i in range(95)]
-    func_path = "/Users/djpassey/Code/gotchabatch/generate_jobs.py"
+    func_path = DIR + "generate_jobs.py"
     func = "fake_func"
     fprefix = "test_job"
     generate_jobs(func, func_path, fprefix,  args, 10, 1, 2)
