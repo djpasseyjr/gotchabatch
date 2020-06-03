@@ -1,29 +1,30 @@
 import os
 from itertools import product
 
-def generate_jobs(fprefix, imports, func, func_args, calls_per_job, hours_per_job, gigs_per_call):
+def generate_jobs(fprefix, func_path, func, func_args, calls_per_job, hours_per_job, gigs_per_call):
     """ Generate jobs for super computing
 
         Parameters
         ----------
         fprefix (string): Prefix for job files and their corresponding output files
-        imports (string): A string containing the import statements to use at the
-            beginning of an experiment file
-        func (string): The name of experiment function to call during a job. This
-            function must accept exactly on keyword argument: `save_file`
+        func_path (string): Path of file containing `func` definition
+        func (string): The name of function to call during a job. This
+            function must accept exactly one keyword argument: `save_file`
         func_args (n-tuple of lists) or (list of n-tuples): Arguments to be passed
-            to `func` during experiments. The function `func` must accept exactly
+            to `func` during experiments. The function `func` must accept
             n non-keyword arguments.
         calls_per_job (int): How calls to func should happen in one job
         hours_per_job (int): Time to allocated to each job. Equal to
             `calls_per_job` * (time it takes to execute `func`). Minimum of one hour
-        gigs_per_call (int): RAM needed to preform a call to `func`
+        gigs_per_call (int): RAM needed to preform a single call to `func`
     """
     # Create directory for storing job files
     jobdir = "GeneratedJobs/" + fprefix
     if os.path.exists(jobdir):
         raise ValueError(f"Supplied file prefix: {fprefix}, was already used to generate jobs")
     os.mkdir(jobdir)
+    os.mkdir(jobdir + "/jobfiles")
+    os.mkdir(jobdir + "/savefiles")
 
     if isinstance(func_args, tuple) and isinstance(func_args[0], list):
         func_args = product(*func_args)
@@ -31,23 +32,28 @@ def generate_jobs(fprefix, imports, func, func_args, calls_per_job, hours_per_jo
         if not isinstance(func_args, list) and isinstance(func_args[0], tuple):
             raise ValueError("Incorrect type for `func_args` parameter. Must be tuple of lists or list of tuples ")
 
+    # Make import statements
+    imports = make_import_script(func, func_path)
+
     # Initialize loop variables
     job_idx = 1
     output_idx = 1
-    job_file = jobdir + '/' + fprefix + '_' + str(job_idx) + '.py'
-    output_file = jobdir + '/' + fprefix + '_' + str(output_idx) + '.pkl'
-    fcontents = imports + '\n'
+    job_file = jobdir + '/jobfiles/' + fprefix + '_' + str(job_idx) + '.py'
+    output_file = jobdir + '/savefiles/' + fprefix + '_' + str(output_idx) + '.pkl'
+    fcontents = imports
     call_count = 0
 
     for fargs in func_args:
         if call_count == calls_per_job:
+            # Save job file
             fstream = open(job_file, 'w')
             fstream.write(fcontents)
             fstream.close()
             job_idx += 1
-            # New job file name
-            job_file = jobdir + '/' + fprefix + '_' + str(job_idx) + '.py'
-            fcontents = imports + '\n'
+            # Increment job file name
+            job_file = jobdir + '/jobfiles/' + fprefix + '_' + str(job_idx) + '.py'
+            # Start new job file contents
+            fcontents = imports
             call_count = 0
         # Write a single call to `func` into the job file
         fcontents += "\nargs = " + str(fargs)
@@ -55,7 +61,7 @@ def generate_jobs(fprefix, imports, func, func_args, calls_per_job, hours_per_jo
         call_count += 1
         # Increment output file name
         output_idx += 1
-        output_file = jobdir + '/' + fprefix + '_' + str(output_idx) + '.pkl'
+        output_file = jobdir + '/save_files/' + fprefix + '_' + str(output_idx) + '.pkl'
 
     # Save leftover calls into a file
     fstream = open(job_file, 'w')
@@ -100,3 +106,15 @@ def write_bash_script(
     new_f.write(tmpl_str)
     new_f.close()
     print('NEXT: sbatch', fprefix + '.sh')
+
+def make_import_script(func, func_path):
+    if not os.path.exists(func_path):
+        raise ValueError("Function file does not exist")
+
+    fstart = func_path.rfind('/') + 1
+    fstop = func_path.rfind(".")
+    file = func_path[fstart:fstop]
+    dir = func_path[:fstart - 1]
+    imports = "import sys\n" + "sys.path.insert(1, \"" + dir + "\")\n"
+    imports += "from " + file + " import " + func + "\n"
+    return imports
