@@ -1,4 +1,4 @@
-# gotachbatch: Generate slurm batches of python files
+# gotchabatch: Generate slurm batches of python files
 Automated file writing to distribute function calls with slurm
 
 ## Overview
