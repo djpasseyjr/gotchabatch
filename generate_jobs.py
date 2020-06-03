@@ -1,5 +1,7 @@
 import os
+import pathlib
 from itertools import product
+DIR = str(pathlib.Path(__file__).parent.absolute())
 
 def generate_jobs(fprefix, func_path, func, func_args, calls_per_job, hours_per_job, gigs_per_call):
     """ Generate jobs for super computing
@@ -19,7 +21,8 @@ def generate_jobs(fprefix, func_path, func, func_args, calls_per_job, hours_per_
         gigs_per_call (int): RAM needed to preform a single call to `func`
     """
     # Create directory for storing job files
-    jobdir = "GeneratedJobs/" + fprefix
+    jobdir = DIR + "/GeneratedJobs/" + fprefix
+
     if os.path.exists(jobdir):
         raise ValueError(f"Supplied file prefix: {fprefix}, was already used to generate jobs")
     os.mkdir(jobdir)
@@ -93,13 +96,17 @@ def write_bash_script(
     if not isinstance(hours_per_job, int) and not isinstance(hours_per_job, float):
         raise ValueError('hours_per_job should be an int or float')
 
-    directory = "GeneratedJobs/" + fprefix
-    tmpl_stream = open('bash_template.sh', 'r')
+    directory = DIR + "/GeneratedJobs/" + fprefix + "/jobfiles/"
+    save_dir = DIR + "/GeneratedJobs/" + fprefix + "/savefiles/"
+
+    tmpl_stream = open(DIR + '/bash_template.sh', 'r')
     tmpl_str = tmpl_stream.read()
     tmpl_str = tmpl_str.replace("#HOURS#", str(hours_per_job))
     tmpl_str = tmpl_str.replace("#MEMORY#", str(gigs_per_call))
     tmpl_str = tmpl_str.replace("#DIR#", directory)
     tmpl_str = tmpl_str.replace("#FNAME#", fprefix)
+    tmpl_str = tmpl_str.replace("#OUTDIR#", save_dir)
+
     # Adjust number of experiments to match slurm job array endpoint inclusion
     tmpl_str = tmpl_str.replace("#NUMBER_JOBS#", str(number_of_jobs - 1))
     new_f = open(fprefix + '.sh', 'w')
@@ -114,7 +121,7 @@ def make_import_script(func, func_path):
     fstart = func_path.rfind('/') + 1
     fstop = func_path.rfind(".")
     file = func_path[fstart:fstop]
-    dir = func_path[:fstart - 1]
+    dir = str(pathlib.Path(func_path).parent.absolute())
     imports = "import sys\n" + "sys.path.insert(1, \"" + dir + "\")\n"
     imports += "from " + file + " import " + func + "\n"
     return imports
