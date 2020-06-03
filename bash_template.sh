@@ -16,4 +16,6 @@ module load python/3.7
 #SBATCH --mail-type=END
 #SBATCH --mail-type=FAIL
 
+echo "Output files will be located in #OUTDIR#"
+
 python3 #DIR#/#FNAME#_${SLURM_ARRAY_TASK_ID}.py
