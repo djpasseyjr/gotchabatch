@@ -26,7 +26,7 @@ def test_job_gen():
     func_path = "/Users/djpassey/Code/gotchabatch/generate_jobs.py"
     func = "fake_func"
     fprefix = "test_job"
-    generate_jobs(fprefix, func_path, func, args, 10, 1, 2)
+    generate_jobs(func, func_path, fprefix,  args, 10, 1, 2)
     assert len(os.listdir(DIR + "/GeneratedJobs/test_job/jobfiles")) == 10
     empty_test_dir()
     rm_test_bash()

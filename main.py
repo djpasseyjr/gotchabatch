@@ -28,17 +28,17 @@ CALLS_PER_JOB = 1
 
 # (int): Time to allocated to each call to `EXPERIMENT_FUNCTION_NAME` (Must be
 # at least one hour)
-HOURS_PER_CALL = 12
+HOURS_PER_JOB = 12
 
 # RAM needed to preform a call to `EXPERIMENT_FUNCTION_NAME`
 GIGS_PER_CALL = 8
 
 generate_jobs(
-    FILE_PREFIX,
+    FUNCTION_NAME,
     FUNCTION_FILE_PATH,
-    EXPERIMENT_FUNCTION_NAME,
+    FILE_PREFIX,
     ARGS,
     CALLS_PER_JOB,
-    HOURS_PER_CALL,
+    HOURS_PER_JOB,
     GIGS_PER_CALL
 )

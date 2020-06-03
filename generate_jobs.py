@@ -3,15 +3,15 @@ import pathlib
 from itertools import product
 DIR = str(pathlib.Path(__file__).parent.absolute())
 
-def generate_jobs(fprefix, func_path, func, func_args, calls_per_job, hours_per_job, gigs_per_call):
+def generate_jobs(func, func_path, fprefix, func_args, calls_per_job, hours_per_job, gigs_per_call):
     """ Generate jobs for super computing
 
         Parameters
         ----------
-        fprefix (string): Prefix for job files and their corresponding output files
-        func_path (string): Path of file containing `func` definition
         func (string): The name of function to call during a job. This
             function must accept exactly one keyword argument: `save_file`
+        func_path (string): Path of file containing `func` definition
+        fprefix (string): Prefix for job files and their corresponding output files
         func_args (n-tuple of lists) or (list of n-tuples): Arguments to be passed
             to `func` during experiments. The function `func` must accept
             n non-keyword arguments.
@@ -20,6 +20,16 @@ def generate_jobs(fprefix, func_path, func, func_args, calls_per_job, hours_per_
             `calls_per_job` * (time it takes to execute `func`). Minimum of one hour
         gigs_per_call (int): RAM needed to preform a single call to `func`
     """
+
+    # Check arguments
+    if isinstance(func_args, tuple) and isinstance(func_args[0], list):
+        func_args = list(product(*func_args))
+    else:
+        if not (isinstance(func_args, list) or isinstance(func_args[0], tuple)):
+            raise ValueError("Incorrect type for `func_args` parameter. Must be tuple of lists or list of tuples ")
+    if  len(func_args) / calls_per_job > 1000:
+        raise ValueError("Number of jobs exceeds 1000: increase `calls_per_job`")
+
     # Create directory for storing job files
     jobdir = DIR + "/GeneratedJobs/" + fprefix
 
@@ -28,12 +38,6 @@ def generate_jobs(fprefix, func_path, func, func_args, calls_per_job, hours_per_
     os.mkdir(jobdir)
     os.mkdir(jobdir + "/jobfiles")
     os.mkdir(jobdir + "/savefiles")
-
-    if isinstance(func_args, tuple) and isinstance(func_args[0], list):
-        func_args = product(*func_args)
-    else:
-        if not isinstance(func_args, list) and isinstance(func_args[0], tuple):
-            raise ValueError("Incorrect type for `func_args` parameter. Must be tuple of lists or list of tuples ")
 
     # Make import statements
     imports = make_import_script(func, func_path)
