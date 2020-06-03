@@ -3,7 +3,7 @@ Automated file writing to distribute function calls with slurm
 
 ## Overview
 
-Sometimes you want to run the same code thousands of times with slightly different parameters and compare results. (i.e. Hyper parameter tuning) This code makes it easy to do that on a super computer that uses slurm. To use this package, you need:
+Want to run the same code thousands of times with slightly different parameters and then compare the results? (i.e. Hyper parameter tuning.) This code will simplify the process by writing jobs and generates a slurm script to run all of the jobs. (Assuming you have access to a super computer that uses slurm.) To use this package, you need:
 
 1. A function that you would like to call multiple times. This function must accept a single keyword argument, `save_file`. Each time the function is called, a unique `.pkl` file name will be passed to the `save_file` keyword argument. (This is so the output of the function can be saved if desired.)
 2. Path to the `.py` file containing the function described in (1).
