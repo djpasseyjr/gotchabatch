@@ -61,4 +61,5 @@ Add directory containing `gotchabatch` to your PYTHONPATH by adding
 ```
 export PYTHONPATH="${PYTHONPATH}:/path/to/directory/containing/repo/"
 ```
-to the .bash_profile file in your home directory. (Create one if it doesn't exist)
+to the .bash_profile file in your home directory. (Create one if it doesn't exist.) Restart your bash session.
+
