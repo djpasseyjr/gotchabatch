@@ -40,13 +40,13 @@ def generate_jobs(func, func_path, fprefix, func_args, calls_per_job, hours_per_
     os.mkdir(jobdir + "/savefiles")
 
     # Make import statements
-    imports = make_import_script(func, func_path)
+    imports = make_import_script(func, func_path, jobdir)
 
     # Initialize loop variables
-    job_idx = 1
-    output_idx = 1
+    job_idx = 0
+    output_idx = 0
     job_file = jobdir + '/jobfiles/' + fprefix + '_' + str(job_idx) + '.py'
-    output_file = jobdir + '/savefiles/' + fprefix + '_' + str(output_idx) + '.pkl'
+    output_file = fprefix + '_' + str(output_idx) + '.pkl'
     fcontents = imports
     call_count = 0
 
@@ -68,7 +68,7 @@ def generate_jobs(func, func_path, fprefix, func_args, calls_per_job, hours_per_
         call_count += 1
         # Increment output file name
         output_idx += 1
-        output_file = jobdir + '/save_files/' + fprefix + '_' + str(output_idx) + '.pkl'
+        output_file = fprefix + '_' + str(output_idx) + '.pkl'
 
     # Save leftover calls into a file
     fstream = open(job_file, 'w')
@@ -100,8 +100,8 @@ def write_bash_script(
     if not isinstance(hours_per_job, int) and not isinstance(hours_per_job, float):
         raise ValueError('hours_per_job should be an int or float')
 
-    directory = DIR + "/GeneratedJobs/" + fprefix + "/jobfiles/"
-    save_dir = DIR + "/GeneratedJobs/" + fprefix + "/savefiles/"
+    directory = DIR + "/GeneratedJobs/" + fprefix + "/jobfiles"
+    save_dir = DIR + "/GeneratedJobs/" + fprefix + "/savefiles"
 
     tmpl_stream = open(DIR + '/bash_template.sh', 'r')
     tmpl_str = tmpl_stream.read()
@@ -118,7 +118,7 @@ def write_bash_script(
     new_f.close()
     print('NEXT: sbatch', fprefix + '.sh')
 
-def make_import_script(func, func_path):
+def make_import_script(func, func_path, jobdir):
     if not os.path.exists(func_path):
         raise ValueError("Function file does not exist")
 
@@ -128,4 +128,5 @@ def make_import_script(func, func_path):
     dir = str(pathlib.Path(func_path).parent.absolute())
     imports = "import sys\n" + "sys.path.insert(1, \"" + dir + "\")\n"
     imports += "from " + file + " import " + func + "\n"
+    imports += "import os \n os.chdir(\"" + jobdir + "/savefiles\")"
     return imports
