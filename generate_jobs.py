@@ -71,10 +71,11 @@ def generate_jobs(func, func_path, fprefix, func_args, calls_per_job, hours_per_
         output_file = fprefix + '_' + str(output_idx) + '.pkl'
 
     # Save leftover calls into a file
-    fstream = open(job_file, 'w')
-    fstream.write(fcontents)
-    fstream.close()
-
+    if call_count != 0:
+        fstream = open(job_file, 'w')
+        fstream.write(fcontents)
+        fstream.close()
+        
     write_bash_script(fprefix, job_idx, hours_per_job, gigs_per_call)
 
 
