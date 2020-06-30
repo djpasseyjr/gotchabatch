@@ -112,7 +112,7 @@ def write_bash_script(
     tmpl_str = tmpl_str.replace("#OUTDIR#", save_dir)
 
     # Adjust number of experiments to match slurm job array endpoint inclusion
-    tmpl_str = tmpl_str.replace("#NUMBER_JOBS#", str(number_of_jobs - 1))
+    tmpl_str = tmpl_str.replace("#NUMBER_JOBS#", str(number_of_jobs))
     new_f = open(fprefix + '.sh', 'w')
     new_f.write(tmpl_str)
     new_f.close()
@@ -120,7 +120,7 @@ def write_bash_script(
 
 def make_import_script(func, func_path, jobdir):
     if not os.path.exists(func_path):
-        raise ValueError("Function file does not exist")
+        raise ValueError(f"Function file \"{func_path}\"  does not exist")
 
     fstart = func_path.rfind('/') + 1
     fstop = func_path.rfind(".")
