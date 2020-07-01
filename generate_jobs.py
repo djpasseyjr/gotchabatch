@@ -129,5 +129,5 @@ def make_import_script(func, func_path, jobdir):
     dir = str(pathlib.Path(func_path).parent.absolute())
     imports = "import sys\n" + "sys.path.insert(1, \"" + dir + "\")\n"
     imports += "from " + file + " import " + func + "\n"
-    imports += "import os \n os.chdir(\"" + jobdir + "/savefiles\")"
+    imports += "import os \nos.chdir(\"" + jobdir + "/savefiles\")"
     return imports
